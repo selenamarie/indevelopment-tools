@@ -21,9 +21,19 @@ launchctl load /usr/local/opt/cassandra/homebrew.mxcl.cassandra.plist
     WARNING: [{}] strategy_options syntax is deprecated, please use {}
     d3ff40da-e685-30ee-897d-48fd8c4c755a
 
-    [default@unknown] use CrashData; 
+    [default@unknown] use CrashData;
     Authenticated to keyspace: CrashData
-    [default@CrashData] create column family CrashInfo and comparator = 'LexicalUUIDType'; 
+    [default@CrashData] create column family CrashInfo and comparator = 'LexicalUUIDType';
     b4917808-09f8-39dd-b6ee-ed16c30c4cce
 
+
+
+Couldn't get UUID type to work for a key.
+
+Switched to:
+
+    [default@unknown] use CrashData;
+    Authenticated to keyspace: CrashData
+    [default@CrashData] create column family CrashInfo2 and comparator = 'AsciiType';
+    60e02d72-f181-32aa-a7ae-ca9482e62ad4
 
