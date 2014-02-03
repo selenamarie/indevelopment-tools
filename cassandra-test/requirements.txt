@@ -1,0 +1,4 @@
+cql==1.4.0
+pycassa==1.11.0
+thrift==0.9.1
+wsgiref==0.1.2
