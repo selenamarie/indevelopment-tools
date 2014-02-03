@@ -3,3 +3,27 @@ http://christopher-batey.blogspot.com/2013/05/installing-cassandra-on-mac-os-x.h
 http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html
 
 160MB download
+
+http://www.mkyong.com/java/how-to-set-java_home-environment-variable-on-mac-os-x/
+
+How I get the JAVA_HOME thing working right:
+    selena@zhongzong:cassandra-test #501 13:36 :) grep JAVA_HOME ~/.bash_profile
+    #export JAVA_HOME="/System/Library/Frameworks/JavaVM.framework/Home"
+    export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk1.7.0_51.jdk/Contents/Home/"
+http://docs.oracle.com/javase/7/docs/webnotes/install/mac/mac-jre.html#uninstall
+for the JRE
+launchctl load /usr/local/opt/cassandra/homebrew.mxcl.cassandra.plist 
+
+
+    $ cassandra-cli
+
+    [default@unknown] create keyspace CrashData with placement_strategy = 'org.apache.cassandra.locator.SimpleStrategy' and strategy_options = [{replication_factor:1}];
+    WARNING: [{}] strategy_options syntax is deprecated, please use {}
+    d3ff40da-e685-30ee-897d-48fd8c4c755a
+
+    [default@unknown] use CrashData; 
+    Authenticated to keyspace: CrashData
+    [default@CrashData] create column family CrashInfo and comparator = 'LexicalUUIDType'; 
+    b4917808-09f8-39dd-b6ee-ed16c30c4cce
+
+
