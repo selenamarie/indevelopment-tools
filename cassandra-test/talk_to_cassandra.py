@@ -1,9 +1,12 @@
-import pycassa
-
-from pycassa.columnfamily import ColumnFamily
-from optparse import OptionParser
-from pycassa import ConnectionPool, ColumnFamily, system_manager
+import datetime
 import uuid
+import random
+
+from optparse import OptionParser
+
+import pycassa
+from pycassa.columnfamily import ColumnFamily
+from pycassa import ConnectionPool, ColumnFamily, system_manager
 
 
 def add_data(opt):
@@ -49,15 +52,45 @@ def add_data(opt):
                     "SystemMemoryUsePercentage": "38",
                     "ProductID": "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"})
 
+    crash_column_family = ColumnFamily(pool, opt.column_family_counter)
+    crash_batch = crash_column_family.batch(queue_size=100)
+
+    # Insert buckets of data hourly for crashes
+
+    crash_seed_signatures = [
+        "FakeSignature1",
+        "FakeSignature2",
+        "FakeSignature3",
+        "FakeSignature4",
+        "FakeSignature5",
+        "FakeSignature6",
+        "FakeSignature7",
+        "FakeSignature8",
+        "FakeSignature9"
+    ]
+
+    now = datetime.datetime.now()
+    for i in xrange(100):
+        current_time = now + datetime.timedelta(seconds=i)
+        row_bucket = "h-%d" % int(current_time.strftime("%H"))
+        column_bucket = int(current_time.strftime("%M"))
+
+        crash_batch.insert(row_bucket, {column_bucket: 1})
+
+        next_sig = random.randint(0, len(crash_seed_signatures)-1)
+        new_row_bucket = "%s-%s" % (row_bucket, crash_seed_signatures[next_sig])
+        crash_batch.insert(new_row_bucket, {column_bucket: 1})
+        print "Just put %s into cassandra." % crash_seed_signatures[next_sig]
+
 
 def verify_schema(opt):
     manager = system_manager.SystemManager(server=opt.hostname)
 
     keyspaces = manager.list_keyspaces()
 
-    default_keyspace = 'CrashData'
-    default_columnfamily = 'CrashInfo2'
-    default_columnfamily_counter = 'CrashInfoCounter'
+    default_keyspace = opt.keyspace
+    default_columnfamily = opt.column_family
+    default_columnfamily_counter = opt.column_family_counter
 
     if default_keyspace not in keyspaces:
         print "Keyspaces does not exist for '%s'. Creating." % default_keyspace
@@ -86,6 +119,9 @@ def main(opt):
 if __name__  == "__main__":
     parser = OptionParser()
     parser.add_option('--hostname', dest="hostname", default="localhost")
+    parser.add_option('--keyspace', dest="keyspace", default="CrashData")
+    parser.add_option('--column_family', dest="column_family", default="CrashInfo2")
+    parser.add_option('--column_family_counter', dest="column_family_counter", default="CrashInfoCounter")
 
     (options, args) = parser.parse_args()
 
