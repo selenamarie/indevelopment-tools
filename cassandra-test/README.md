@@ -1,4 +1,7 @@
 
+Setup
+-----
+
 http://christopher-batey.blogspot.com/2013/05/installing-cassandra-on-mac-os-x.html
 http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html
 
@@ -37,3 +40,11 @@ Switched to:
     [default@CrashData] create column family CrashInfo2 and comparator = 'AsciiType';
     60e02d72-f181-32aa-a7ae-ca9482e62ad4
 
+
+Making a demo app
+-----------------
+* Making a realtime aggregator of counters: http://blog.markedup.com/2013/04/cassandra-real-time-analytics-part-2/
+
+* Building a RT thing: https://www.youtube.com/watch?v=wccOk_mRaoU
+** https://github.com/acunu/painbird/tree/master/src/tweetstream
+** https://wiki.apache.org/cassandra/Counters
