@@ -48,3 +48,14 @@ Making a demo app
 * Building a RT thing: https://www.youtube.com/watch?v=wccOk_mRaoU
 ** https://github.com/acunu/painbird/tree/master/src/tweetstream
 ** https://wiki.apache.org/cassandra/Counters
+
+
+Making a consumer
+-----------------
+
+* Make a crashmover(?) to put rabbitmq data into a special queue for cassandra consumption
+
+
+
+
+

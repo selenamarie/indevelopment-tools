@@ -1,6 +1,7 @@
 import datetime
 import uuid
 import random
+import time
 
 from optparse import OptionParser
 
@@ -72,16 +73,33 @@ def add_data(opt):
     now = datetime.datetime.now()
     for i in xrange(100):
         current_time = now + datetime.timedelta(seconds=i)
+
         row_bucket = "h-%d" % int(current_time.strftime("%H"))
+        print "Adding row_bucket %s" % row_bucket
         column_bucket = int(current_time.strftime("%M"))
+        print "Adding to column_bucket %s" % column_bucket
 
         crash_batch.insert(row_bucket, {column_bucket: 1})
 
         next_sig = random.randint(0, len(crash_seed_signatures)-1)
         new_row_bucket = "%s-%s" % (row_bucket, crash_seed_signatures[next_sig])
+        print "Adding row_bucket %s, column_bucket %s" % (new_row_bucket, column_bucket)
         crash_batch.insert(new_row_bucket, {column_bucket: 1})
         print "Just put %s into cassandra." % crash_seed_signatures[next_sig]
 
+
+def do_query(opt, start, finish):
+    pool = ConnectionPool('CrashData',
+                          ['localhost:9160'])
+
+    cassandra = ColumnFamily(pool, opt.column_family_counter)
+    for key, contents in cassandra.get_range(column_count=10,filter_empty=False):
+        print "Key: ", key
+        print contents.items()
+    column_start = 41
+    column_end = 44
+    row_key = "h-%d" % 11
+    print "row_key: %s, column_start: %s, column_end: %s" % (row_key, column_start, column_end)
 
 def verify_schema(opt):
     manager = system_manager.SystemManager(server=opt.hostname)
@@ -115,6 +133,11 @@ def main(opt):
     verify_schema(opt)
     add_data(opt)
 
+    print opt.start, opt.end
+    start =  '11'
+    end = '11'
+    do_query(opt, start, end)
+
 
 if __name__  == "__main__":
     parser = OptionParser()
@@ -122,7 +145,10 @@ if __name__  == "__main__":
     parser.add_option('--keyspace', dest="keyspace", default="CrashData")
     parser.add_option('--column_family', dest="column_family", default="CrashInfo2")
     parser.add_option('--column_family_counter', dest="column_family_counter", default="CrashInfoCounter")
+    parser.add_option('--start', dest="start", default='')
+    parser.add_option('--end', dest="end", default='')
 
     (options, args) = parser.parse_args()
 
     main(options)
+
