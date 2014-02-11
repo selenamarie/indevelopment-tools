@@ -2,12 +2,15 @@ import datetime
 import uuid
 import random
 import time
+import json
 
 from optparse import OptionParser
 
 import pycassa
 from pycassa.columnfamily import ColumnFamily
 from pycassa import ConnectionPool, ColumnFamily, system_manager
+
+from ascii_graph import Pyasciigraph
 
 
 def add_data(opt):
@@ -82,7 +85,10 @@ def add_data(opt):
         crash_batch.insert(row_bucket, {column_bucket: 1})
 
         next_sig = random.randint(0, len(crash_seed_signatures)-1)
-        new_row_bucket = "%s-%s" % (row_bucket, crash_seed_signatures[next_sig])
+        #new_row_bucket = "%s-%s" % (row_bucket, crash_seed_signatures[next_sig])
+        new_row_bucket = '{ "hour": "%d", "signature": "%s" }' % (
+            int(current_time.strftime("%H")), crash_seed_signatures[next_sig]
+        )
         print "Adding row_bucket %s, column_bucket %s" % (new_row_bucket, column_bucket)
         crash_batch.insert(new_row_bucket, {column_bucket: 1})
         print "Just put %s into cassandra." % crash_seed_signatures[next_sig]
@@ -93,13 +99,18 @@ def do_query(opt, start, finish):
                           ['localhost:9160'])
 
     cassandra = ColumnFamily(pool, opt.column_family_counter)
-    for key, contents in cassandra.get_range(column_count=10,filter_empty=False):
-        print "Key: ", key
-        print contents.items()
-    column_start = 41
-    column_end = 44
-    row_key = "h-%d" % 11
-    print "row_key: %s, column_start: %s, column_end: %s" % (row_key, column_start, column_end)
+    graph = Pyasciigraph()
+    for key, contents in cassandra.get_range(column_count=60,filter_empty=False):
+        # get_range returns:
+        # key: OrderedDict() [made of: (minute, count of instances) tuples]
+        things = ''
+        try:
+            jsonkey = json.loads(key)
+            things =  jsonkey.items()
+        except:
+            continue
+        for line in graph.graph(str(things), sorted(contents.items())):
+            print(line)
 
 def verify_schema(opt):
     manager = system_manager.SystemManager(server=opt.hostname)
